@@ -1,0 +1,1 @@
+document.querySelectorAll('[data-business-model]').forEach(function(a){a.addEventListener('click',function(){document.querySelector('#business-lead input[name=model]').value=a.getAttribute('data-business-model');});});

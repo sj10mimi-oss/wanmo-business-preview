@@ -1,5 +1,10 @@
 # WANMO — B2B preview
 
+Предпросмотр исправленных фото, галерей и видео TITAN:
+https://sj10mimi-oss.github.io/wanmo-business-preview/review/catalog/
+
+Раздел review содержит только публичные страницы и необходимые файлы оформления. Отправка заявок, оплата и счётчики отключены; рабочий сайт не обновляется.
+
 Предпросмотр: https://sj10mimi-oss.github.io/wanmo-business-preview/
 
 Тексты: [TEXTS.md](TEXTS.md).
