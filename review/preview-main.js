@@ -65,7 +65,7 @@
   });
 
   /* Попапы: ссылки вида #consultation, #order, #opencart, #trial */
-  var openPop = function (id) { var p = document.getElementById('pop-' + id); if (p) { p.classList.add('open'); return true; } return false; };
+  var openPop = function (id) { var p = document.getElementById('pop-' + id); if (p) { p.classList.add('open'); if (id === 'consultation' && autoConsultation) autoConsultation.stop(); return true; } return false; };
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"], [data-pop]');
     if (!a) return;
@@ -78,8 +78,57 @@
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') $$('.pop.open').forEach(function (p) { p.classList.remove('open'); }); });
 
+  /* Предложение консультации через 45 секунд на сайте, один раз за сессию вкладки.
+     Используется существующая форма: её текст, поля и отправка не меняются. */
+  var autoConsultation = (function () {
+    var popup = $('#pop-consultation'), key = 'wanmo_auto_consultation_v1', delay = 45000;
+    if (!popup || /^\/(?:en\/)?(?:admin|event|agreement|privacy-policy|oferta)(?:\/|$)/.test(location.pathname)) return;
+    var session, state, timer;
+    try {
+      session = window.sessionStorage;
+      if (!session) return;
+      state = JSON.parse(session.getItem(key) || 'null');
+      if (!state || typeof state.startedAt !== 'number' || !Number.isFinite(state.startedAt) || state.startedAt > Date.now()) state = { startedAt: Date.now(), handled: false };
+      session.setItem(key, JSON.stringify(state));
+    } catch (e) { return; } // Without session storage, avoid showing it again on every page.
+    function stopped() {
+      try { if (JSON.parse(session.getItem(key) || '{}').handled) state.handled = true; } catch (e) {}
+      return state.handled;
+    }
+    function stop() {
+      state.handled = true; clearTimeout(timer);
+      try { session.setItem(key, JSON.stringify(state)); } catch (e) {}
+    }
+    function schedule() {
+      clearTimeout(timer);
+      if (!stopped()) timer = setTimeout(show, Math.max(1000, delay - (Date.now() - state.startedAt)));
+    }
+    function show() {
+      if (stopped()) return;
+      if (document.visibilityState === 'hidden') return;
+      if ($('form[data-lead].done')) { stop(); return; }
+      var active = document.activeElement;
+      if ($('.pop.open, #side.open') || active && active.closest && active.closest('input, textarea, select, [contenteditable="true"]')) {
+        timer = setTimeout(show, 5000); return;
+      }
+      openPop('consultation');
+      popup.setAttribute('aria-modal', 'true');
+      popup.setAttribute('tabindex', '-1');
+      if (typeof popup.focus === 'function') popup.focus();
+    }
+    function engaged(e) {
+      if (e.target.closest && e.target.closest('form[data-lead], .cdek-choice')) stop();
+    }
+    document.addEventListener('input', engaged);
+    document.addEventListener('change', engaged);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState !== 'hidden') schedule(); });
+    schedule();
+    return { stop: stop };
+  })();
+
   /* ICE and all bundles containing it are unavailable. Also guard saved carts. */
   function unavailableItem(item) {
+    if (item._legacyUnavailable) return true;
     var current = window.WanmoCatalog && window.WanmoCatalog[String(item.id || '').split('-')[0]];
     if (current) return !current.available;
     return /\bICE\b/i.test(item.name || '') || /^(992561481772|773782742022|520715153632|211755436762|164272817722|968316181222)(-|$)/.test(String(item.id || ''));
@@ -91,6 +140,8 @@
   }
   function currentCartItem(item) {
     var next = Object.assign({}, item);
+    var aliases=window.WanmoLegacyProductIds||{};
+    if(Object.prototype.hasOwnProperty.call(aliases,String(next.id))){if(aliases[next.id]===null)next._legacyUnavailable=true;else next.id=aliases[next.id];}
     if (isSteps(next)) next.id = '912100402752';
     var p = window.WanmoCatalog && window.WanmoCatalog[String(next.id).split('-')[0]];
     if (p) {
@@ -136,6 +187,7 @@
   $$('form[data-lead]').forEach(function (f) {
     f.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (f.dataset.cart && !cart().length) { alert(T('Корзина пуста. Добавьте товар перед оформлением.', 'Your cart is empty. Add a product before placing an order.')); return; }
       var fd = new FormData(f), parts = [];
       var name = (fd.get('name') || '').trim(), phone = (fd.get('phone') || '').replace(/[^\d+]/g, '');
       if (!f.querySelector('[name=agree]').checked) { alert(T('Подтвердите согласие на обработку персональных данных', 'Please confirm your consent to the processing of personal data')); return; }
@@ -146,16 +198,30 @@
       var comment = (fd.get('comment') || '').trim(); if (comment) parts.push(comment);
       var lead = (f.dataset.lead || '') + (EN && f.dataset.lead ? ' (EN)' : '');
       var body = { name: name, phone: phone, comment: (lead ? '[' + lead + '] ' : '') + parts.join('; '), page: location.pathname, city: (fd.get('city') || '').trim(), use: lead };
+      body.agree = true;
+      body.consentVersion = window.WanmoConsentVersions && window.WanmoConsentVersions[EN ? 'en' : 'ru'] ? window.WanmoConsentVersions[EN ? 'en' : 'ru'].version : 'legacy-unversioned';
+      body.kind = f.dataset.cart ? 'order' : 'lead';
+      ['email','telegram','max','businessType','company','model'].forEach(function(k){body[k]=(fd.get(k)||'').trim();});
+      body.attribution = {}; UTM_KEYS.forEach(function(k){if(savedUtm[k])body.attribution[k]=savedUtm[k];});
       UTM_KEYS.slice(0, 5).forEach(function (k) { if (savedUtm[k]) body[k] = savedUtm[k]; });
+      if(f.dataset.cart) body.items=cart().map(function(i){return {productId:String(i.id),quantity:i.q};});
+      if(f.dataset.cart&&window.WANMOShipping&&window.WANMOShipping.active())body.cdekToken=window.WANMOShipping.token();
+      var fingerprint=JSON.stringify(body);
+      if(f._submissionFingerprint!==fingerprint){f._submissionFingerprint=fingerprint;f._submissionId=window.crypto&&window.crypto.randomUUID?window.crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var n=Math.random()*16|0;return(c==='x'?n:(n&3|8)).toString(16);});}
+      body.submissionId=f._submissionId;
       var btn = f.querySelector('button[type=submit]'); btn.disabled = true;
-      Promise.resolve({ json: function () { return Promise.resolve({ ok: true, preview: true }); } })
-        .then(function (r) { return r.json(); })
+      var sending=f.dataset.cart&&window.WANMOShipping&&window.WANMOShipping.active()
+        ?window.WANMOShipping.submit(body)
+        :Promise.resolve({ json: function () { return Promise.resolve({ ok: true, preview: true, message: 'Предпросмотр: заявка не отправлена.' }); } }).then(function(r){return r.json();});
+      sending
         .then(function (r) {
+          if (r.ok && autoConsultation) autoConsultation.stop();
+          if(r.error==='CONSENT_VERSION_CHANGED')r.message=T('Текст согласия обновлён. Обновите страницу и подтвердите согласие ещё раз.', 'The consent text has changed. Refresh the page and confirm your consent again.');
           if (r.ok && /^Для бизнеса/.test(f.dataset.lead || '')) {
             try { if (typeof window.ym === 'function') window.ym(Number(window.mainMetrikaId || 106327080), 'reachGoal', 'b2b_lead_success'); if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', {form_name:'business',page_path:location.pathname}); } catch(ignore) {}
           }
           var m = f.querySelector('.msg');
-          m.textContent = r.preview ? 'Предпросмотр: заявка не отправлена.' : r.ok ? T('Спасибо! Данные успешно отправлены. Мы свяжемся с вами.', 'Thank you! Your request has been sent. We will get back to you shortly.') : T('Не удалось отправить. Позвоните нам: +7 (925) 143-18-12', 'Sending failed. Please call us: +7 (925) 143-18-12');
+          m.textContent = r.message || (r.ok ? (r.reference ? T('Спасибо! Обращение сохранено. Номер: ', 'Thank you! Your request has been saved. Reference: ')+r.reference+T('. Мы свяжемся с вами.', '. We will get back to you shortly.') : T('Спасибо! Данные успешно отправлены. Мы свяжемся с вами.', 'Thank you! Your request has been sent. We will get back to you shortly.')) : T('Не удалось отправить. Позвоните нам: +7 (925) 143-18-12', 'Sending failed. Please call us: +7 (925) 143-18-12'));
           m.classList.add('on'); if (r.ok) { f.classList.add('done'); if (f.dataset.cart) { store.set('wanmo_media_preview_cart', []); updCount(); } }
         })
         .catch(function () { var m = f.querySelector('.msg'); m.textContent = T('Нет связи с сервером. Позвоните нам: +7 (925) 143-18-12', 'No connection to the server. Please call us: +7 (925) 143-18-12'); m.classList.add('on'); })
@@ -172,6 +238,7 @@
     $$('.cart-cnt').forEach(function (c) { c.textContent = n; c.classList.toggle('on', n > 0); });
     var f = store.get('wanmo_fav', []).length;
     $$('.fav-cnt').forEach(function (c) { c.textContent = f; c.classList.toggle('on', f > 0); });
+    document.dispatchEvent(new document.defaultView.CustomEvent('wanmo:cart-change'));
   }
   function renderCart() {
     var box = $('#cart-list'); if (!box) return;
