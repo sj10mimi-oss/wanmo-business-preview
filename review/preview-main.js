@@ -163,15 +163,27 @@
   store.set('wanmo_media_preview_cart', repairedCart);
 
   /* Размер комплекта: отдельный код XL, цена как у L. */
-  $$('[data-kit-size]').forEach(function(select) {
-    select.addEventListener('change', function() {
-      var area=select.closest('.pcard') || select.closest('.pinfo');
+  $$('[data-kit-size]').forEach(function(selector) {
+    var area=selector.closest('.pcard') || selector.closest('.pinfo');
+    function chooseSize(size) {
+      if(size!=='L'&&size!=='XL')return;
+      selector.setAttribute('data-selected-size',size);
+      $$('[data-size-choice]',selector).forEach(function(button){button.setAttribute('aria-pressed',String(button.getAttribute('data-size-choice')===size));});
+      var active=selector.querySelector('[data-size-choice="'+size+'"]'),caption=selector.querySelector('[data-size-dimensions]');
+      if(active&&caption)caption.textContent=active.getAttribute('data-dimensions');
       $$('[data-kit-original]', area).forEach(function(button) {
         var d=JSON.parse(button.getAttribute('data-kit-original'));
-        if(select.value==='XL') { d.id=String(d.id).replace(/(-pre)?$/, '-xl$1'); d.name += ' (XL)'; }
+        if(size==='XL') { d.id=String(d.id).replace(/(-pre)?$/, '-xl$1'); d.name += ' (XL)'; }
         button.setAttribute('data-add', JSON.stringify(d));
       });
-    });
+      $$('[data-kit-detail-original]',area).forEach(function(link){var original=link.getAttribute('data-kit-detail-original');link.setAttribute('href',original+(size==='XL'?(original.indexOf('?')<0?'?':'&')+'size=XL':''));});
+      $$('[data-kit-dimension-l]',area).forEach(function(value){value.textContent=value.getAttribute(size==='XL'?'data-kit-dimension-xl':'data-kit-dimension-l');});
+    }
+    $$('[data-size-choice]',selector).forEach(function(button){button.addEventListener('click',function(){chooseSize(button.getAttribute('data-size-choice'));});});
+    // Old open pages may still contain the original native selector.
+    if(selector.tagName==='SELECT')selector.addEventListener('change',function(){chooseSize(selector.value);});
+    var initial='L';try{if(!selector.closest('.pcard')&&new URLSearchParams(location.search||'').get('size')==='XL')initial='XL';}catch(ignore){}
+    chooseSize(initial);
   });
 
   /* Метки рекламы: запоминаем при входе, чтобы дошли до заявки и после перехода по страницам */
@@ -192,6 +204,7 @@
       var fd = new FormData(f), parts = [];
       var name = (fd.get('name') || '').trim(), phone = (fd.get('phone') || '').replace(/[^\d+]/g, '');
       if (!f.querySelector('[name=agree]').checked) { alert(T('Подтвердите согласие на обработку персональных данных', 'Please confirm your consent to the processing of personal data')); return; }
+      if (!['phone','email','telegram','max'].some(function(k){return String(fd.get(k)||'').trim().replace(/^@/,'').length>0;})) { alert(T('Укажите телефон, почту, Telegram или MAX, чтобы мы могли с вами связаться.', 'Enter your phone, email, Telegram or MAX so we can contact you.')); return; }
       if (phone && phone.indexOf('+') !== 0) phone = '+7' + phone;
       ['telegram', 'max', 'city', 'email', 'businessType', 'company', 'model'].forEach(function (k) { var v = (fd.get(k) || '').trim(); if (v) parts.push({ telegram: 'Telegram', max: 'MAX', city: 'Город', email: 'E-mail', businessType: 'Тип объекта', company: 'Компания', model: 'Интересующая модель' }[k] + ': ' + v); });
       UTM_KEYS.forEach(function (k) { if (savedUtm[k]) parts.push(k + ': ' + savedUtm[k]); });
@@ -218,6 +231,7 @@
         .then(function (r) {
           if (r.ok && autoConsultation) autoConsultation.stop();
           if(r.error==='CONSENT_VERSION_CHANGED')r.message=T('Текст согласия обновлён. Обновите страницу и подтвердите согласие ещё раз.', 'The consent text has changed. Refresh the page and confirm your consent again.');
+          if(r.error==='CONTACT_REQUIRED')r.message=T('Укажите телефон, почту, Telegram или MAX, чтобы мы могли с вами связаться.', 'Enter your phone, email, Telegram or MAX so we can contact you.');
           if (r.ok && /^Для бизнеса/.test(f.dataset.lead || '')) {
             try { if (typeof window.ym === 'function') window.ym(Number(window.mainMetrikaId || 106327080), 'reachGoal', 'b2b_lead_success'); if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', {form_name:'business',page_path:location.pathname}); } catch(ignore) {}
           }
