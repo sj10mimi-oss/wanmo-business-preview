@@ -480,8 +480,8 @@ p{margin:0 0 .8em}
 .gal .thumbs img{width:100%;height:100%;object-fit:cover}
 .gal .gal-video-thumb::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-35%,-50%);border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:12px solid #fff;filter:drop-shadow(0 1px 3px #0008)}
 .pinfo .opt.steps-upsell{display:flex;align-items:center;gap:14px;padding:8px;text-align:left}
-.pinfo .steps-upsell-media{display:grid;place-items:center;flex:0 0 auto;width:112px;height:76px;overflow:hidden;border-radius:10px;background:#fff}
-.pinfo .steps-upsell-media>img{display:block;width:132%;height:132%;max-width:none;object-fit:contain;image-rendering:auto}
+.pinfo .steps-upsell-media{position:relative;display:block;flex:0 0 auto;width:112px;height:76px;overflow:hidden;border-radius:10px;background:#fff}
+.pinfo .steps-upsell-media>img{position:absolute;left:-16%;top:-16%;display:block;width:132%;height:132%;max-width:none;object-fit:contain;image-rendering:auto}
 .pinfo .steps-upsell>b{flex:1;min-width:0;font-size:16px;line-height:1.4}
 .pinfo .steps-upsell>span:empty{display:none}
 @media(max-width:640px){.gal .gal-prev{left:12px}.gal .gal-next{right:12px}.gal .thumbs{gap:8px}.gal .thumbs button{width:calc((100% - 32px)/5);height:auto;aspect-ratio:1/1}.pinfo .opt.steps-upsell{gap:10px;padding:6px}.pinfo .steps-upsell-media{width:78px;height:52px}.pinfo .steps-upsell>b{font-size:14px}}
@@ -500,8 +500,8 @@ p{margin:0 0 .8em}
 .pinfo .opt.on{border-color:#000}
 .pinfo .opt.filters-upsell{display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 14px;align-items:center;padding:8px;margin:20px 0;background:#fff;text-align:left}
 .pinfo .filters-upsell:hover{background:#fff}
-.pinfo .filters-upsell-media{grid-row:1/3;display:grid;place-items:center;width:96px;height:76px;overflow:hidden;border-radius:10px;background:#fff}
-.pinfo .filters-upsell-media img{display:block;width:100%;height:100%;object-fit:contain}
+.pinfo .filters-upsell-media{grid-row:1/3;position:relative;display:block;width:96px;height:76px;overflow:hidden;border-radius:10px;background:#fff}
+.pinfo .filters-upsell-media img{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;object-fit:contain}
 .pinfo .filters-upsell-copy{min-width:0}
 .pinfo .filters-upsell-copy b{font-size:16px;line-height:1.2;margin-bottom:2px}
 .pinfo .filters-upsell-caption{display:block;font-size:13px;line-height:1.3;color:#666}
