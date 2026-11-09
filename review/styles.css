@@ -287,6 +287,23 @@ p{margin:0 0 .8em}
 .pop h3{font-size:28px;font-weight:500;margin-bottom:12px}
 .pop p{margin-bottom:24px}
 
+/* Consultation: copy on the left, a compact form on the right. */
+#pop-consultation .box{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;max-width:1160px;padding:40px;background:var(--gray);max-height:calc(100dvh - 40px)}
+#pop-consultation .consultation-intro{min-width:0}
+#pop-consultation h3{font-size:30px;font-weight:400;line-height:1.2;margin:0 0 20px}
+#pop-consultation .consultation-intro p{font-size:15px;line-height:1.45;max-width:390px;margin:0}
+#pop-consultation .form{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px 16px;align-content:start;min-width:0}
+#pop-consultation .form>div,#pop-consultation .form input{min-width:0}
+#pop-consultation .form input[type=text],#pop-consultation .form input[type=tel]{height:54px;background:#fff;border-radius:14px;font-size:14px}
+#pop-consultation .form label{font-size:13px;line-height:1.3}
+#pop-consultation .form .tel{min-height:54px}
+#pop-consultation .form .tel input{background:transparent}
+#pop-consultation .form .chk{font-size:12px;line-height:1.4;margin:2px 0 0}
+#pop-consultation .form .send{min-height:54px;font-size:15px;font-weight:400;margin-top:2px;padding:12px 22px}
+#pop-consultation .x{width:36px;height:36px;right:10px;top:8px;font-size:28px;display:grid;place-items:center;padding:0}
+@media(max-width:960px){#pop-consultation .box{grid-template-columns:minmax(0,1fr);gap:26px;padding:34px;max-width:680px}#pop-consultation h3{font-size:28px;padding-right:20px}#pop-consultation .consultation-intro p{max-width:none}}
+@media(max-width:600px){#pop-consultation{padding:16px}#pop-consultation .box{padding:28px 22px;gap:22px;max-height:calc(100dvh - 32px);border-radius:20px}#pop-consultation h3{font-size:24px;margin-bottom:14px}#pop-consultation .consultation-intro p{font-size:14px}#pop-consultation .form{grid-template-columns:minmax(0,1fr);gap:14px}#pop-consultation .form .send{width:100%}#pop-consultation .x{width:40px;height:40px;right:4px;top:4px}}
+
 /* ---------- Внутренние страницы ---------- */
 .page-h1{font-size:36px;font-weight:600;margin-bottom:12px}
 .lead{font-size:14px;max-width:560px}
