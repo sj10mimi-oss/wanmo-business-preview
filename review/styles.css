@@ -268,7 +268,7 @@ p{margin:0 0 .8em}
 .ftr h4{color:#fff;font-size:14px;font-weight:500;margin-bottom:18px}
 .ftr .ct{display:grid;gap:14px;font-size:14px;align-content:start}
 .ftr .ct .i{display:flex;gap:10px;align-items:center}
-.ftr .ct .i img{width:20px;height:20px;filter:invert(1)}
+.ftr .ct .i img{width:20px;height:20px;object-fit:contain;flex:0 0 20px;filter:none}
 .ftr .ct .hrs{color:#ccdcff}
 .ftr .soc{display:flex;gap:10px}
 .ftr .soc img{width:32px;height:32px;object-fit:contain}
@@ -322,6 +322,7 @@ p{margin:0 0 .8em}
 .amb .ph img{width:100%;height:250px;object-fit:cover;border-radius:12px}
 .amb.rev2 .ph{order:2}
 .amb.rev2 .ph img{height:300px}
+.amb .ph img.amb-sayapin-portrait{object-position:50% 30%}
 .amb h2{font-size:30px;font-weight:600;margin-bottom:10px}
 .amb .role{color:var(--muted);font-size:14px;margin-bottom:6px}
 .amb .ig{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;text-decoration:none;margin-bottom:20px}
