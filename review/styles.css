@@ -514,7 +514,11 @@ p{margin:0 0 .8em}
 .accessory-quantity-controls input::-webkit-inner-spin-button,.accessory-quantity-controls input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .filters-upsell-add{min-height:40px;padding:9px 18px;font-size:13px;cursor:pointer}
 .accessory-quantity-controls button:focus-visible,.accessory-quantity-controls input:focus-visible,.filters-upsell-add:focus-visible{outline:2px solid #111;outline-offset:-3px}
-@media(max-width:640px){.pinfo .opt.filters-upsell{grid-template-columns:96px minmax(0,1fr);gap:10px 12px;padding:12px}.pinfo .filters-upsell-media{grid-row:1;width:96px;height:78px}.pinfo .filters-upsell-copy b{font-size:14px}.pinfo .filters-upsell-caption{font-size:12px}.pinfo .filters-upsell-actions{grid-column:1/-1;justify-content:space-between;flex-wrap:nowrap;gap:10px}.filters-upsell-add{flex:1;padding:9px 12px}}
+/* Accessory panels use two thirds of the product column, centred. */
+.pinfo .opt.steps-upsell,.pinfo .opt.filters-upsell{width:calc(100% / 1.5);flex:0 0 calc(100% / 1.5);max-width:100%;margin-left:auto;margin-right:auto}
+.pinfo .filters-upsell-media{grid-row:1}
+.pinfo .filters-upsell-actions{grid-column:1/-1}
+@media(max-width:640px){.pinfo .opt.steps-upsell,.pinfo .opt.filters-upsell{width:100%;flex-basis:100%}.pinfo .opt.filters-upsell{grid-template-columns:96px minmax(0,1fr);gap:10px 12px;padding:12px}.pinfo .filters-upsell-media{width:96px;height:78px}.pinfo .filters-upsell-copy b{font-size:14px}.pinfo .filters-upsell-caption{font-size:12px}.pinfo .filters-upsell-actions{justify-content:space-between;flex-wrap:wrap;gap:10px}.filters-upsell-add{flex:1 1 140px;padding:9px 12px}}
 .pinfo .actions{display:flex;gap:10px;margin:24px 0 30px;flex-wrap:wrap}
 .pinfo .actions .btn{padding:14px 28px}
 .pdescr{font-size:14px;line-height:1.6}
