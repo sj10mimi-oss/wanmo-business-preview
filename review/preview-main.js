@@ -287,15 +287,29 @@
     clearTimeout(cartNoticeTimer);
     cartNoticeTimer = setTimeout(function () { notice.hidden = true; }, 6000);
   }
+  $$('[data-accessory-upsell]').forEach(function(block){
+    var input=block.querySelector('[data-accessory-quantity]'),add=block.querySelector('[data-accessory-add]');
+    function refresh(normalize){
+      var value=Number(input.value),quantity=Number.isFinite(value)?Math.min(100,Math.max(1,Math.trunc(value))):1;
+      if(normalize)input.value=String(quantity);
+      $$('[data-accessory-delta]',block).forEach(function(button){button.disabled=add.disabled||(Number(button.getAttribute('data-accessory-delta'))<0?quantity<=1:quantity>=100);});
+      if(add.hasAttribute('data-add'))add.textContent=T('Добавить · ','Add · ')+fmt(quantity*JSON.parse(add.getAttribute('data-add')).price);
+    }
+    $$('[data-accessory-delta]',block).forEach(function(button){button.addEventListener('click',function(){input.value=String((Number(input.value)||1)+Number(button.getAttribute('data-accessory-delta')));refresh(true);});});
+    input.addEventListener('input',function(){refresh(false);});input.addEventListener('change',function(){refresh(true);});refresh(true);
+  });
   $$('[data-add]').forEach(function (b) {
     b.addEventListener('click', function (e) {
       e.preventDefault();
       var d = currentCartItem(JSON.parse(b.getAttribute('data-add'))), c = cart(), f = null;
+      var quantityInput=b.closest('[data-accessory-upsell]')?.querySelector('[data-accessory-quantity]'),quantity=quantityInput?Math.min(100,Math.max(1,Math.trunc(Number(quantityInput.value)||1))):1;
+      if(quantityInput)quantityInput.value=String(quantity);
       if (unavailableItem(d)) { alert(T('ICE и комплекты с ним временно отсутствуют в наличии.', 'ICE and its bundles are temporarily out of stock.')); return; }
       c.forEach(function (i) { if (i.id === d.id) f = i; });
-      if (f) f.q++; else { d.q = 1; c.push(d); }
+      if(quantityInput&&f&&f.q+quantity>100){showCartNotice(T('В корзине может быть до 100 комплектов фильтров. Измените количество.','Your cart can contain up to 100 filter packs. Adjust the quantity.'));return;}
+      if (f) f.q+=quantity; else { d.q = quantity; c.push(d); }
       store.set('wanmo_media_preview_cart', c); updCount(); renderCart();
-      if (isSteps(d) || b.hasAttribute('data-add-notify')) showCartNotice(T('Надувные ступеньки добавлены в корзину', 'Inflatable steps added to cart'));
+      if (isSteps(d) || b.hasAttribute('data-add-notify')) showCartNotice(b.getAttribute('data-add-notify')||T('Надувные ступеньки добавлены в корзину', 'Inflatable steps added to cart'));
       else openPop('opencart');
     });
   });
