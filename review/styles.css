@@ -535,6 +535,19 @@ p{margin:0 0 .8em}
 .cart-row .nm{flex:1}
 .cart-row button{border:0;background:none;font-size:18px}
 .cart-sum{font-weight:600;margin-bottom:20px}
+.form[data-cart] input[type=text],.form[data-cart] input[type=tel],.form[data-cart] input[type=email],.form[data-cart] textarea{border:1px solid #111;min-width:0}
+.form[data-cart] .tel{border:1px solid #111;min-width:0}
+.form[data-cart] .tel>span{flex:none}
+.form[data-cart] .tel input{border:0;flex:1;min-width:0;width:0}
+.form[data-cart] input:focus-visible,.form[data-cart] textarea:focus-visible{outline:2px solid #111;outline-offset:2px}
+.form[data-cart] .tel:focus-within{outline:2px solid #111;outline-offset:2px}
+.form[data-cart] .tel input:focus-visible{outline:0}
+.cart-payment-intro{font-size:14px;font-weight:600;margin:4px 0 0}
+.cart-payment{border:0;padding:0;margin:16px 0 8px;min-width:0}
+.cart-payment legend{font-size:15px;padding:0;margin-bottom:12px}
+.form .cart-payment-option{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.5;margin:0 0 10px;cursor:pointer}
+.cart-payment-option input{appearance:none;flex:0 0 20px;width:20px;height:20px;border:1px solid #777;border-radius:50%;margin:0;background:#fff}
+.cart-payment-option input:checked{border-color:#111;background:radial-gradient(circle,#111 0 5px,#fff 5.5px)}
 
 /* Текстовые страницы (оферта, политика) */
 .legal-text{max-width:900px;font-size:15px;line-height:1.65}

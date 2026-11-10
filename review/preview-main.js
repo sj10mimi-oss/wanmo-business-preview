@@ -215,6 +215,7 @@
       body.agree = true;
       body.consentVersion = window.WanmoConsentVersions && window.WanmoConsentVersions[EN ? 'en' : 'ru'] ? window.WanmoConsentVersions[EN ? 'en' : 'ru'].version : 'legacy-unversioned';
       body.kind = f.dataset.cart ? 'order' : 'lead';
+      if(f.dataset.cart)body.paymentMethod=String(fd.get('paymentMethod')||'');
       ['email','telegram','max','businessType','company','model'].forEach(function(k){body[k]=(fd.get(k)||'').trim();});
       body.attribution = {}; UTM_KEYS.forEach(function(k){if(savedUtm[k])body.attribution[k]=savedUtm[k];});
       UTM_KEYS.slice(0, 5).forEach(function (k) { if (savedUtm[k]) body[k] = savedUtm[k]; });
