@@ -148,7 +148,7 @@
       next.price = /-pre$/.test(String(next.id)) && p.preorderPrice != null ? p.preorderPrice : p.price;
       next.img = p.photos[0].src;
       if (String(next.id).indexOf('-') < 0) next.name = EN ? p.nameEn || p.name : p.name;
-      else if (/-pre$/.test(String(next.id))) next.name = (next.name || '').replace(/Декабрь(?!\s*[–—-]\s*январь)/gi, 'Декабрь — январь').replace(/December(?!\s*[–—-]\s*January)/g, 'December–January');
+      else if (/-pre$/.test(String(next.id))) next.name = (next.name || '').replace(/Декабрь(?:\s*[–—-]\s*январь)?/gi, 'Январь').replace(/December(?:\s*[–—-]\s*January)?/gi, 'January');
     }
     return next;
   }
